@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的待辦事項 My To-Do List</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --primary-color: #4a90e2;
+            --primary-hover: #357abd;
+            --completed-color: #aaaaaa;
+            --border-color: #e0e0e0;
+            --note-color: #555555;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .todo-container {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 650px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #2c3e50;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 15px;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .btn-add-trigger {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .input-panel {
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-panel.active {
+            display: flex;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-panel input[type="text"], 
+        .input-panel textarea {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .time-setting-block {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .allday-label {
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .panel-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-submit { background-color: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .btn-cancel { background-color: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+
+        .todo-list { list-style: none; padding: 0; margin: 0; }
+
+        .todo-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .todo-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+
+        .todo-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .todo-content {
+            font-size: 15px;
+            word-break: break-all;
+            font-weight: 500;
+        }
+
+        /* 可編輯備忘錄區塊的樣式 */
+        .todo-memo-block {
+            font-size: 13px;
+            color: var(--note-color);
+            background-color: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+            margin-top: 2px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-height: 18px;
+        }
+
+        .todo-memo-block:hover {
+            background-color: #f1f5f9;
+        }
+
+        .todo-memo-block:empty::before {
+            content: "💡 點擊此處可隨時新增/更新進度備忘...";
+            color: #cbd5e1;
+            font-style: italic;
+        }
+
+        .memo-edit-textarea {
+            width: 100%;
+            font-size: 13px;
+            font-family: inherit;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .todo-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 11px;
+            color: #888888;
+            margin-left: 15px;
+            min-width: 140px;
+            line-height: 1.6;
+            padding-top: 4px;
+        }
+
+        /* 完成狀態 */
+        .todo-item.completed .todo-content { text-decoration: line-through; color: var(--completed-color); }
+        .todo-item.completed .todo-memo-block { color: #cccccc; border-left-color: #cbd5e1; background-color: #fafafa; pointer-events: none; }
+        .todo-item.completed .todo-meta { color: #cccccc; }
+
+        .btn-delete { background: none; border: none; color: #cfd8dc; cursor: pointer; font-size: 18px; margin-left: 10px; }
+        .btn-delete:hover { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="todo-container">
+    <h1>我的待辦事項 List</h1>
+    
+    <div class="action-bar">
+        <button class="btn-add-trigger" id="btn-show-panel">+ 新增待辦事項</button>
+    </div>
+
+    <div class="input-panel" id="input-panel">
+        <div class="input-row">
+            <div class="input-group">
+                <label style="font-size: 12px; color: #666; font-weight: bold;">事項內容 :</label>
+                <input type="text" id="todo-text" placeholder="輸入待辦事項..." autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label style="font-size: 12px; color: #666; font-weight: bold;">截止時間 (Dead Line) :</label>
+                <input type="datetime-local" id="todo-deadline">
+                <div class="time-setting-block">
+                    <label class="allday-label">
+                        <input type="checkbox" id="todo-allday"> 當作全天事項
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label style="font-size: 12px; color: #666; font-weight: bold;">初始備忘錄 / 進度紀錄 :</label>
+            <input type="text" id="todo-memo" placeholder="（選填，建置後仍可隨時點擊修改）" autocomplete="off">
+        </div>
+
+        <div class="panel-buttons">
+            <button class="btn-cancel" id="btn-cancel">取消</button>
+            <button class="btn-submit" id="btn-add">加入</button>
+        </div>
+    </div>
+
+    <ul class="todo-list" id="todo-list"></ul>
+</div>
+
+<script>
+    // 升級快取 key 確保載入乾淨資料
+    const STORAGE_KEY = 'my_github_todos_v3_final';
+    let todos = [];
+
+    const btnShowPanel = document.getElementById('btn-show-panel');
+    const inputPanel = document.getElementById('input-panel');
+    const btnCancel = document.getElementById('btn-cancel');
+    const btnAdd = document.getElementById('btn-add');
+    const todoText = document.getElementById('todo-text');
+    const todoMemo = document.getElementById('todo-memo');
+    const todoAllday = document.getElementById('todo-allday');
+    const todoDeadline = document.getElementById('todo-deadline');
+    const todoList = document.getElementById('todo-list');
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const localData = localStorage.getItem(STORAGE_KEY);
+        if (localData) {
+            todos = JSON.parse(localData);
+        }
+        renderTodos();
+    });
+
+    btnShowPanel.addEventListener('click', () => {
+        inputPanel.classList.add('active');
+        todoText.focus();
+    });
+
+    btnCancel.addEventListener('click', clearInput);
+
+    function clearInput() {
+        todoText.value = '';
+        todoMemo.value = '';
+        todoDeadline.value = '';
+        todoAllday.checked = false;
+        inputPanel.classList.remove('active');
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+    }
+
+    function addTodo() {
+        const text = todoText.value.trim();
+        const memo = todoMemo.value.trim();
+        if (text === '') {
+            alert('請輸入事項內容！');
+            return;
+        }
+
+        const now = new Date();
+        const createdTimeStr = formatDateTime(now);
+
+        // 處理時間邏輯
+        let deadlineStr = '無限制';
+        if (todoDeadline.value) {
+            const d = new Date(todoDeadline.value);
+            if (todoAllday.checked) {
+                // 如果勾選全天，直接抹除後面時間字串
+                deadlineStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} (全天)`;
+            } else {
+                deadlineStr = formatDateTime(d);
+            }
+        }
+
+        const newTodo = {
+            id: Date.now(),
+            text: text,
+            memo: memo,
+            createdTime: createdTimeStr,
+            deadline: deadlineStr,
+            completed: false
+        };
+
+        todos.push(newTodo);
+        saveToLocalStorage();
+        renderTodos();
+        clearInput();
+    }
+
+    function renderTodos() {
+        todoList.innerHTML = '';
+
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+
+            // 勾選框
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'todo-checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.addEventListener('change', () => {
+                todo.completed = checkbox.checked;
+                saveToLocalStorage();
+                renderTodos();
+            });
+
+            // 主體內容
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'todo-body';
+
+            const contentSpan = document.createElement('span');
+            contentSpan.className = 'todo-content';
+            contentSpan.textContent = todo.text;
+            bodyDiv.appendChild(contentSpan);
+
+            // 備忘錄顯示/編輯區
+            const memoBlock = document.createElement('div');
+            memoBlock.className = 'todo-memo-block';
+            memoBlock.textContent = todo.memo;
+
+            // 點擊備忘錄區塊，切換為動態輸入模式
+            memoBlock.addEventListener('click', (e) => {
+                // 如果已經在編輯狀態則不重複執行
+                if (memoBlock.querySelector('textarea')) return;
+
+                const currentText = todo.memo;
+                memoBlock.innerHTML = ''; // 清空純文字
+                
+                const textarea = document.createElement('textarea');
+                textarea.className = 'memo-edit-textarea';
+                textarea.value = currentText;
+                
+                // 離開焦點時自動存檔
+                const saveMemoChanges = () => {
+                    todo.memo = textarea.value.trim();
+                    saveToLocalStorage();
+                    renderTodos(); // 重新渲染
+                };
+
+                textarea.addEventListener('blur', saveMemoChanges);
+                textarea.addEventListener('keydown', (evt) => {
+                    if (evt.key === 'Enter' && evt.ctrlKey) { // Ctrl + Enter 快速儲存
+                        saveMemoChanges();
+                    }
+                });
+
+                memoBlock.appendChild(textarea);
+                textarea.focus();
+                e.stopPropagation(); // 防止事件泡泡
+            });
+
+            bodyDiv.appendChild(memoBlock);
+
+            // 時間資訊
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'todo-meta';
+            metaDiv.innerHTML = `
+                <div>建: ${todo.createdTime}</div>
+                <div>期: ${todo.deadline}</div>
+            `;
+
+            // 刪除按鈕
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete';
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.addEventListener('click', () => {
+                todos = todos.filter(t => t.id !== todo.id);
+                saveToLocalStorage();
+                renderTodos();
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(bodyDiv);
+            li.appendChild(metaDiv);
+            li.appendChild(deleteBtn);
+            todoList.appendChild(li);
+        });
+    }
+
+    btnAdd.addEventListener('click', addTodo);
+    todoText.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTodo(); });
+
+    function formatDateTime(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    }
+</script>
+
+</body>
+</html>
