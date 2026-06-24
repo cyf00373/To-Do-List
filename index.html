@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的待辦事項 My To-Do List</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --primary-color: #4a90e2;
+            --primary-hover: #357abd;
+            --completed-color: #aaaaaa;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .todo-container {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 650px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #2c3e50;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 15px;
+        }
+
+        /* 觸發新增的按鈕與輸入區塊 */
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .btn-add-trigger {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-add-trigger:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* 隱藏的輸入區域 */
+        .input-panel {
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none; /* 預設隱藏 */
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-panel.active {
+            display: flex;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-panel input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .input-panel input[type="datetime-local"] {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .panel-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 待辦事項列表 */
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 勾選框樣式 */
+        .todo-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        /* 內容與時間資訊 */
+        .todo-content {
+            flex: 1;
+            font-size: 15px;
+            word-break: break-all;
+            transition: color 0.3s;
+        }
+
+        .todo-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 11px;
+            color: #888888;
+            margin-left: 15px;
+            min-width: 130px;
+        }
+
+        /* 完成狀態（刪除線、反灰） */
+        .todo-item.completed .todo-content {
+            text-decoration: line-through;
+            color: var(--completed-color);
+        }
+
+        .todo-item.completed .todo-meta {
+            color: #cccccc;
+        }
+
+        /* 刪除按鈕 */
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #cfd8dc;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: color 0.2s;
+        }
+
+        .btn-delete:hover {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="todo-container">
+    <h1>我的待辦事項 List</h1>
+    
+    <div class="action-bar">
+        <button class="btn-add-trigger" id="btn-show-panel">+ 新增待辦事項</button>
+    </div>
+
+    <div class="input-panel" id="input-panel">
+        <div class="input-row">
+            <input type="text" id="todo-text" placeholder="輸入待辦事項內容..." autocomplete="off">
+            <div>
+                <label style="font-size: 12px; color: #666; display: block; margin-bottom: 4px;">截止時間 (Dead Line):</label>
+                <input type="datetime-local" id="todo-deadline">
+            </div>
+        </div>
+        <div class="panel-buttons">
+            <button class="btn-cancel" id="btn-cancel">取消</button>
+            <button class="btn-submit" id="btn-add">加入</button>
+        </div>
+    </div>
+
+    <ul class="todo-list" id="todo-list">
+        </ul>
+</div>
+
+<script>
+    // 取得 DOM 元素
+    const btnShowPanel = document.getElementById('btn-show-panel');
+    const inputPanel = document.getElementById('input-panel');
+    const btnCancel = document.getElementById('btn-cancel');
+    const btnAdd = document.getElementById('btn-add');
+    const todoText = document.getElementById('todo-text');
+    const todoDeadline = document.getElementById('todo-deadline');
+    const todoList = document.getElementById('todo-list');
+
+    // 顯示/隱藏輸入面板
+    btnShowPanel.addEventListener('click', () => {
+        inputPanel.classList.add('active');
+        todoText.focus();
+    });
+
+    btnCancel.addEventListener('click', () => {
+        clearInput();
+    });
+
+    // 清除輸入內容並隱藏面板
+    function clearInput() {
+        todoText.value = '';
+        todoDeadline.value = '';
+        inputPanel.classList.remove('active');
+    }
+
+    // 新增待辦事項函式
+    function addTodo() {
+        const text = todoText.value.trim();
+        if (text === '') {
+            alert('請輸入事項內容！');
+            return;
+        }
+
+        // 取得當前加入時間
+        const now = new Date();
+        const createdTimeStr = formatDateTime(now);
+
+        // 處理 Deadline 時間
+        const deadlineVal = todoDeadline.value;
+        const deadlineStr = deadlineVal ? formatDateTime(new Date(deadlineVal)) : '無限制';
+
+        // 建立列表節點 (li)
+        const li = document.createElement('li');
+        li.className = 'todo-item';
+
+        // 建立勾選框
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'todo-checkbox';
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                li.classList.add('completed');
+            } else {
+                li.classList.remove('completed');
+            }
+        });
+
+        // 建立文字內容
+        const contentSpan = document.createElement('span');
+        contentSpan.className = 'todo-content';
+        contentSpan.textContent = text;
+
+        // 建立時間 Meta 區塊
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'todo-meta';
+        metaDiv.innerHTML = `
+            <div>建: ${createdTimeStr}</div>
+            <div>期: ${deadlineStr}</div>
+        `;
+
+        // 建立刪除按鈕
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-delete';
+        deleteBtn.innerHTML = '&times;';
+        deleteBtn.addEventListener('click', () => {
+            li.remove();
+        });
+
+        // 組裝
+        li.appendChild(checkbox);
+        li.appendChild(contentSpan);
+        li.appendChild(metaDiv);
+        li.appendChild(deleteBtn);
+
+        // 塞入列表
+        todoList.appendChild(li);
+
+        // 清空輸入框
+        clearInput();
+    }
+
+    // 點擊加入按鈕或按 Enter 鍵觸發
+    btnAdd.addEventListener('click', addTodo);
+    todoText.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTodo();
+    });
+
+    // 時間格式化輔助函式 (YYYY-MM-DD HH:mm)
+    function formatDateTime(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    }
+</script>
+
+</body>
+</html>
