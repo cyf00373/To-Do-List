@@ -13,6 +13,7 @@
             --primary-hover: #357abd;
             --completed-color: #aaaaaa;
             --border-color: #e0e0e0;
+            --note-color: #666666;
         }
 
         body {
@@ -45,7 +46,6 @@
             padding-bottom: 15px;
         }
 
-        /* 觸發新增的按鈕與輸入區塊 */
         .action-bar {
             display: flex;
             justify-content: flex-end;
@@ -68,13 +68,12 @@
             background-color: var(--primary-hover);
         }
 
-        /* 隱藏的輸入區域 */
         .input-panel {
             background-color: var(--bg-color);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            display: none; /* 預設隱藏 */
+            display: none;
             flex-direction: column;
             gap: 12px;
         }
@@ -85,24 +84,54 @@
 
         .input-row {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
-        .input-panel input[type="text"] {
+        .input-group {
             flex: 1;
             min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-panel input[type="text"], 
+        .input-panel textarea {
             padding: 8px 12px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
+            font-family: inherit;
         }
 
-        .input-panel input[type="datetime-local"] {
-            padding: 8px;
+        .input-panel textarea {
+            resize: vertical;
+            min-height: 40px;
+        }
+
+        .time-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-panel input[type="datetime-local"],
+        .input-panel input[type="date"] {
+            padding: 7px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
+        }
+
+        .allday-label {
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            user-select: none;
         }
 
         .panel-buttons {
@@ -129,7 +158,6 @@
             cursor: pointer;
         }
 
-        /* 待辦事項列表 */
         .todo-list {
             list-style: none;
             padding: 0;
@@ -138,8 +166,8 @@
 
         .todo-item {
             display: flex;
-            align-items: center;
-            padding: 12px 8px;
+            align-items: flex-start;
+            padding: 14px 8px;
             border-bottom: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
@@ -148,20 +176,38 @@
             border-bottom: none;
         }
 
-        /* 勾選框樣式 */
         .todo-checkbox {
             width: 18px;
             height: 18px;
             margin-right: 12px;
+            margin-top: 3px;
             cursor: pointer;
         }
 
-        /* 內容與時間資訊 */
-        .todo-content {
+        .todo-body {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .todo-content {
             font-size: 15px;
             word-break: break-all;
+            font-weight: 500;
             transition: color 0.3s;
+        }
+
+        .todo-memo {
+            font-size: 13px;
+            color: var(--note-color);
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #f9f9f9;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border-left: 3px solid #cbd5e1;
+            margin-top: 2px;
         }
 
         .todo-meta {
@@ -171,27 +217,35 @@
             font-size: 11px;
             color: #888888;
             margin-left: 15px;
-            min-width: 130px;
+            min-width: 135px;
+            line-height: 1.5;
+            padding-top: 2px;
         }
 
-        /* 完成狀態（刪除線、反灰） */
+        /* 完成狀態樣式變更 */
         .todo-item.completed .todo-content {
             text-decoration: line-through;
             color: var(--completed-color);
+        }
+
+        .todo-item.completed .todo-memo {
+            color: #cccccc;
+            border-left-color: #e2e8f0;
+            background-color: #fafafa;
         }
 
         .todo-item.completed .todo-meta {
             color: #cccccc;
         }
 
-        /* 刪除按鈕 */
         .btn-delete {
             background: none;
             border: none;
             color: #cfd8dc;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             margin-left: 10px;
+            padding-top: 0;
             transition: color 0.2s;
         }
 
@@ -211,126 +265,210 @@
 
     <div class="input-panel" id="input-panel">
         <div class="input-row">
-            <input type="text" id="todo-text" placeholder="輸入待辦事項內容..." autocomplete="off">
-            <div>
-                <label style="font-size: 12px; color: #666; display: block; margin-bottom: 4px;">截止時間 (Dead Line):</label>
-                <input type="datetime-local" id="todo-deadline">
+            <div class="input-group">
+                <label style="font-size: 12px; color: #666; font-weight: bold;">事項內容 :</label>
+                <input type="text" id="todo-text" placeholder="輸入待辦事項..." autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label style="font-size: 12px; color: #666; font-weight: bold;">截止時間 (Dead Line) :</label>
+                <div class="time-group" id="time-picker-container">
+                    <input type="datetime-local" id="todo-deadline">
+                </div>
             </div>
         </div>
+        
+        <div class="input-group">
+            <label style="font-size: 12px; color: #666; font-weight: bold;">備忘錄 / 備註 :</label>
+            <textarea id="todo-memo" placeholder="輸入補充說明或備忘紀錄...（選填）"></textarea>
+        </div>
+
         <div class="panel-buttons">
+            <label class="allday-label" style="margin-right: auto;">
+                <input type="checkbox" id="todo-allday"> 全天事項
+            </label>
             <button class="btn-cancel" id="btn-cancel">取消</button>
             <button class="btn-submit" id="btn-add">加入</button>
         </div>
     </div>
 
-    <ul class="todo-list" id="todo-list">
-        </ul>
+    <ul class="todo-list" id="todo-list"></ul>
 </div>
 
 <script>
-    // 取得 DOM 元素
+    let todos = [];
+
     const btnShowPanel = document.getElementById('btn-show-panel');
     const inputPanel = document.getElementById('input-panel');
     const btnCancel = document.getElementById('btn-cancel');
     const btnAdd = document.getElementById('btn-add');
     const todoText = document.getElementById('todo-text');
-    const todoDeadline = document.getElementById('todo-deadline');
+    const todoMemo = document.getElementById('todo-memo');
+    const todoAllday = document.getElementById('todo-allday');
+    const timePickerContainer = document.getElementById('time-picker-container');
     const todoList = document.getElementById('todo-list');
 
-    // 顯示/隱藏輸入面板
+    // 初始化讀取 LocalStorage
+    window.addEventListener('DOMContentLoaded', () => {
+        const localData = localStorage.getItem('my_github_todos_v2');
+        if (localData) {
+            todos = JSON.parse(localData);
+            renderTodos();
+        }
+        resetTimePicker(false); // 預設非全天
+    });
+
+    // 監聽全天勾選狀態，切換對應的 HTML 時間輸入框類型
+    todoAllday.addEventListener('change', function() {
+        resetTimePicker(this.checked);
+    });
+
+    function resetTimePicker(isAllDay) {
+        if (isAllDay) {
+            timePickerContainer.innerHTML = '<input type="date" id="todo-deadline">';
+        } else {
+            timePickerContainer.innerHTML = '<input type="datetime-local" id="todo-deadline">';
+        }
+    }
+
     btnShowPanel.addEventListener('click', () => {
         inputPanel.classList.add('active');
         todoText.focus();
     });
 
-    btnCancel.addEventListener('click', () => {
-        clearInput();
-    });
+    btnCancel.addEventListener('click', clearInput);
 
-    // 清除輸入內容並隱藏面板
     function clearInput() {
         todoText.value = '';
-        todoDeadline.value = '';
+        todoMemo.value = '';
+        todoAllday.checked = false;
+        resetTimePicker(false);
         inputPanel.classList.remove('active');
     }
 
-    // 新增待辦事項函式
+    function saveToLocalStorage() {
+        localStorage.setItem('my_github_todos_v2', JSON.stringify(todos));
+    }
+
+    // 新增待辦事項
     function addTodo() {
         const text = todoText.value.trim();
+        const memo = todoMemo.value.trim();
         if (text === '') {
             alert('請輸入事項內容！');
             return;
         }
 
-        // 取得當前加入時間
         const now = new Date();
-        const createdTimeStr = formatDateTime(now);
+        const createdTimeStr = formatDateTime(now, false);
 
-        // 處理 Deadline 時間
-        const deadlineVal = todoDeadline.value;
-        const deadlineStr = deadlineVal ? formatDateTime(new Date(deadlineVal)) : '無限制';
+        // 處理 Deadline 與全天
+        const deadlineInput = document.getElementById('todo-deadline');
+        const deadlineVal = deadlineInput.value;
+        let deadlineStr = '無限制';
 
-        // 建立列表節點 (li)
-        const li = document.createElement('li');
-        li.className = 'todo-item';
-
-        // 建立勾選框
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'todo-checkbox';
-        checkbox.addEventListener('change', function() {
-            if (this.checked) {
-                li.classList.add('completed');
+        if (deadlineVal) {
+            if (todoAllday.checked) {
+                // 全天模式只取日期
+                const d = new Date(deadlineVal);
+                deadlineStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} (全天)`;
             } else {
-                li.classList.remove('completed');
+                deadlineStr = formatDateTime(new Date(deadlineVal), true);
             }
-        });
+        }
 
-        // 建立文字內容
-        const contentSpan = document.createElement('span');
-        contentSpan.className = 'todo-content';
-        contentSpan.textContent = text;
+        const newTodo = {
+            id: Date.now(),
+            text: text,
+            memo: memo,
+            createdTime: createdTimeStr,
+            deadline: deadlineStr,
+            completed: false
+        };
 
-        // 建立時間 Meta 區塊
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'todo-meta';
-        metaDiv.innerHTML = `
-            <div>建: ${createdTimeStr}</div>
-            <div>期: ${deadlineStr}</div>
-        `;
-
-        // 建立刪除按鈕
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-delete';
-        deleteBtn.innerHTML = '&times;';
-        deleteBtn.addEventListener('click', () => {
-            li.remove();
-        });
-
-        // 組裝
-        li.appendChild(checkbox);
-        li.appendChild(contentSpan);
-        li.appendChild(metaDiv);
-        li.appendChild(deleteBtn);
-
-        // 塞入列表
-        todoList.appendChild(li);
-
-        // 清空輸入框
+        todos.push(newTodo);
+        saveToLocalStorage();
+        renderTodos();
         clearInput();
     }
 
-    // 點擊加入按鈕或按 Enter 鍵觸發
+    // 渲染畫面
+    function renderTodos() {
+        todoList.innerHTML = '';
+
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'todo-checkbox';
+            checkbox.checked = todo.completed;
+            
+            checkbox.addEventListener('change', () => {
+                todo.completed = checkbox.checked;
+                saveToLocalStorage();
+                renderTodos();
+            });
+
+            // 主體內容區塊（包含標題與備忘錄）
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'todo-body';
+
+            const contentSpan = document.createElement('span');
+            contentSpan.className = 'todo-content';
+            contentSpan.textContent = todo.text;
+            bodyDiv.appendChild(contentSpan);
+
+            // 如果有寫備忘錄才渲染出來
+            if (todo.memo) {
+                const memoDiv = document.createElement('div');
+                memoDiv.className = 'todo-memo';
+                memoDiv.textContent = todo.memo;
+                bodyDiv.appendChild(memoDiv);
+            }
+
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'todo-meta';
+            metaDiv.innerHTML = `
+                <div>建: ${todo.createdTime}</div>
+                <div>期: ${todo.deadline}</div>
+            `;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete';
+            deleteBtn.innerHTML = '&times;';
+            
+            deleteBtn.addEventListener('click', () => {
+                todos = todos.filter(t => t.id !== todo.id);
+                saveToLocalStorage();
+                renderTodos();
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(bodyDiv);
+            li.appendChild(metaDiv);
+            li.appendChild(deleteBtn);
+            todoList.appendChild(li);
+        });
+    }
+
     btnAdd.addEventListener('click', addTodo);
+    // 在事項內容或備忘錄按 Ctrl+Enter 也可以送出
     todoText.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addTodo();
     });
 
-    // 時間格式化輔助函式 (YYYY-MM-DD HH:mm)
-    function formatDateTime(date) {
+    // 時間格式化輔助函式
+    function formatDateTime(date, includeTime) {
         const yyyy = date.getFullYear();
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         const dd = String(date.getDate()).padStart(2, '0');
+        if (!includeTime) {
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+        }
+        // 如果是設定截止日期的格式
         const hh = String(date.getHours()).padStart(2, '0');
         const min = String(date.getMinutes()).padStart(2, '0');
         return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
