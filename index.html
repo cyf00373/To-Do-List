@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MY TODO LIST - Loft Edition</title>
+    <title>Focus Matrix - Loft Edition</title>
     <!-- 引入高質感字體 Inter 與 JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,15 +11,15 @@
     
     <style>
         :root {
-            /* 漸層背景色：從頂部微光深灰 到 底部的深沉極黑 */
+            /* 質感微光高空漸層 */
             --bg-gradient: radial-gradient(circle at 50% 30%, #315371 0%, #111113 80%);
             --card-bg: #1e1e21;         /* 內斂卡片色 */
             --input-bg: #141416;        /* 輸入框沉浸底色 */
             --border-color: #2e2e34;    /* 細緻分隔線 */
             
-            --text-main: #ededf0;       
-            --text-sub: #8e8e93;        
-            --text-muted: #5c5c61;      
+            --text-main: #ededf0;       /* 主文字 */
+            --text-sub: #8e8e93;        /* 次要文字 */
+            --text-muted: #5c5c61;      /* 弱化文字 */
             
             --accent-p1: #ef4444;       
             --accent-p2: #f97316;       
@@ -29,18 +29,20 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-gradient); /* 套用漸層 */
-            background-attachment: fixed;  /* 滾動時背景固定，維持光影質感 */
+            background: var(--bg-gradient);
+            background-attachment: fixed;
             color: var(--text-main);
             margin: 0;
-            padding: 30px 20px;
+            padding: 24px;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             box-sizing: border-box;
         }
 
         .app-header {
-            max-width: 1200px;
-            margin: 0 auto 25px auto;
+            max-width: 100%;
+            margin: 0 0 20px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -49,7 +51,7 @@
         }
 
         h1 {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.5px;
             margin: 0;
@@ -60,9 +62,9 @@
             background-color: #2b2b30;
             color: var(--text-main);
             border: 1px solid var(--border-color);
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -75,16 +77,15 @@
 
         /* 彈出輸入面板 */
         .input-panel {
-            max-width: 1200px;
-            margin: 0 auto 30px auto;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
             display: none;
             flex-direction: column;
-            gap: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .input-panel.active {
@@ -102,30 +103,28 @@
             min-width: 200px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .form-group label {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-sub);
-            letter-spacing: 0.5px;
         }
 
-        input[type="text"], input[type="date"], select, textarea {
+        input[type="text"], input[type="date"], select {
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             color: var(--text-main);
-            padding: 10px 14px;
-            font-size: 14.5px;
+            padding: 8px 12px;
+            font-size: 14px;
             font-family: inherit;
             outline: none;
-            transition: border-color 0.2s;
-            color-scheme: dark; /* 強制原生日期月曆呈現深色樣式 */
+            color-scheme: dark;
         }
 
-        input[type="text"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
             border-color: #3b82f6;
         }
 
@@ -133,24 +132,26 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
-        .btn-save { background-color: #3b82f6; color: white; border: none; padding: 10px 22px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        .btn-cancel { background-color: transparent; color: var(--text-sub); border: 1px solid var(--border-color); padding: 10px 22px; border-radius: 6px; cursor: pointer; }
+        .btn-save { background-color: #3b82f6; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .btn-cancel { background-color: transparent; color: var(--text-sub); border: 1px solid var(--border-color); padding: 8px 18px; border-radius: 6px; cursor: pointer; }
 
-        /* 四看板網格 */
+        /* 單行四直列 Layout */
         .matrix-grid {
-            max-width: 1200px;
-            margin: 0 auto;
+            flex: 1;
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            min-height: 0; /* 確保內部 flex 滾動正常 */
+            overflow-x: auto;
         }
 
-        @media (max-width: 850px) {
+        @media (max-width: 1024px) {
             .matrix-grid {
-                grid-template-columns: 1fr;
+                /* 平板或窄螢幕時可橫向滾動保持直列體驗，或自動適應 */
+                min-width: 900px;
             }
         }
 
@@ -159,26 +160,28 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
-            min-height: 280px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            height: 100%;
+            box-sizing: border-box;
         }
 
         .quadrant-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 16px;
+            gap: 8px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .quadrant-icon {
-            font-size: 18px;
-            line-height: 1;
+            font-size: 16px;
         }
 
         .todo-list {
@@ -187,15 +190,27 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* 自訂滾動條細緻化 */
+        .todo-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .todo-list::-webkit-scrollbar-thumb {
+            background: #333338;
+            border-radius: 4px;
         }
 
         /* 單一 TODO 卡片 */
         .todo-card {
-            background-color: #18181b;
+            background-color: #141416;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 14px 16px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -209,12 +224,12 @@
         .todo-top-row {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 8px;
         }
 
         .todo-checkbox {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             margin-top: 3px;
             cursor: pointer;
             accent-color: var(--text-sub);
@@ -222,31 +237,45 @@
 
         .todo-title {
             flex: 1;
-            font-size: 15.5px;
+            font-size: 14.5px;
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.35;
             color: #ffffff;
             word-break: break-all;
         }
 
         .todo-deadline {
-            font-family: 'JetBrains Mono', 'Inter', monospace;
-            font-size: 12px;
-            color: #60a5fa; /* 亮藍色突顯 Deadline */
-            background-color: #111113;
-            padding: 4px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #60a5fa;
+            background-color: #0d0d0f;
+            padding: 3px 6px;
             border-radius: 4px;
-            border: 1px solid #28282d;
+            border: 1px solid #26262b;
             white-space: nowrap;
         }
 
-        /* 目標與進度雙 Textbox 區域 */
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #484850;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 2px;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .btn-delete:hover {
+            color: var(--accent-p1);
+        }
+
+        /* 目標與進度區域 */
         .todo-details {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 2px;
-            padding-left: 30px;
+            gap: 10px;
+            flex: 1;
         }
 
         .field-box {
@@ -255,8 +284,13 @@
             gap: 4px;
         }
 
+        /* 讓進度框區域可以隨文字與拉動擴展 */
+        .field-box.progress-box {
+            flex: 1;
+        }
+
         .field-label {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.8px;
@@ -264,42 +298,39 @@
         }
 
         .editable-textbox {
-            font-size: 13.5px;
+            font-size: 13px;
             color: var(--text-main);
-            background-color: #121214;
-            border: 1px solid #28282d;
-            border-radius: 5px;
-            padding: 8px 10px;
+            background-color: #0b0b0c;
+            border: 1px solid #26262b;
+            border-radius: 6px;
+            padding: 8px;
             outline: none;
             font-family: inherit;
-            resize: vertical;
-            min-height: 24px;
-            transition: all 0.2s ease;
+            resize: vertical; /* 允許使用者手動自由拉高 */
+            line-height: 1.4;
+            transition: border-color 0.2s ease;
         }
 
         .editable-textbox:focus {
-            background-color: #0b0b0c;
             border-color: #3b82f6;
         }
 
-        .btn-delete {
-            background: none;
-            border: none;
-            color: #484850;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 0 4px;
-            transition: color 0.2s;
+        /* 目標預設固定較小，進度框預設有更高的彈性高度 */
+        .goal-textbox {
+            min-height: 32px;
+            height: 38px;
         }
 
-        .btn-delete:hover {
-            color: var(--accent-p1);
+        .progress-textbox {
+            min-height: 60px;
+            height: 100px; /* 初始較高的預設值，支援更多列紀錄 */
+            flex: 1;
         }
 
         /* 完成狀態視覺 */
         .todo-card.completed {
             opacity: 0.45;
-            background-color: #141416;
+            background-color: #0f0f11;
         }
 
         .todo-card.completed .todo-title {
@@ -318,7 +349,7 @@
 <body>
 
 <div class="app-header">
-    <h1>Focusing TO-DO Matrix</h1>
+    <h1>Focus Matrix</h1>
     <button class="btn-add-trigger" id="btn-show-panel">+ 新增事項</button>
 </div>
 
@@ -377,7 +408,7 @@
     </div>
 </div>
 
-<!-- 四大區塊看板網格 -->
+<!-- 單行四直列看板網格 -->
 <div class="matrix-grid">
     <div class="quadrant q1">
         <div class="quadrant-header">
@@ -406,7 +437,7 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'loft_matrix_todos_v4';
+    const STORAGE_KEY = 'loft_matrix_todos_v5';
     let todos = [];
 
     const btnShowPanel = document.getElementById('btn-show-panel');
@@ -450,11 +481,7 @@
     }
 
     /**
-     * 智能計算動態相對時間文字
-     * - 今天 / 明天 / 後天
-     * - 本週幾 (如: 這週五)
-     * - 下週幾 (至下週日為止)
-     * - 超過下週日則直接顯示 YYYY-MM-DD
+     * 智能相對時間計算
      */
     function formatRelativeDate(dateStr, timeSlotStr) {
         if (!dateStr) return '無期限';
@@ -467,12 +494,10 @@
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         today.setHours(0, 0, 0, 0);
 
-        // 計算相差幾天
         const diffTime = target.getTime() - today.getTime();
         const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-        // 計算「下週日」的日期物件
-        const currentDayOfWeek = today.getDay(); // 0 是週日, 1-6 是週一~六
+        const currentDayOfWeek = today.getDay(); 
         const daysToThisSunday = (7 - currentDayOfWeek) % 7;
         const nextSunday = new Date(today);
         nextSunday.setDate(today.getDate() + daysToThisSunday + 7);
@@ -486,11 +511,8 @@
         } else if (diffDays === 2) {
             dateLabel = '後天';
         } else if (target > today && target <= nextSunday) {
-            // 在下週日之前的日期，顯示「這週X」或「下週X」
             const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
             const targetDayOfWeek = target.getDay();
-
-            // 判斷屬於「這週」還是「下週」
             const thisSunday = new Date(today);
             thisSunday.setDate(today.getDate() + daysToThisSunday);
 
@@ -518,8 +540,8 @@
             quadrant: todoQuadrant.value,
             goal: todoGoal.value.trim(),
             progress: todoProgress.value.trim(),
-            rawDate: inputDate.value,          // 儲存原始 YYYY-MM-DD
-            timeSlot: selectTimeSlot.value,     // 儲存原始時間選單值
+            rawDate: inputDate.value,
+            timeSlot: selectTimeSlot.value,
             completed: false
         };
 
@@ -555,7 +577,6 @@
             title.className = 'todo-title';
             title.textContent = todo.text;
 
-            // 即時計算動態時間
             const deadline = document.createElement('div');
             deadline.className = 'todo-deadline';
             deadline.textContent = formatRelativeDate(todo.rawDate, todo.timeSlot);
@@ -582,8 +603,7 @@
             goalBox.className = 'field-box';
             goalBox.innerHTML = `<span class="field-label">Goal Target</span>`;
             const goalInput = document.createElement('textarea');
-            goalInput.className = 'editable-textbox';
-            goalInput.rows = 1;
+            goalInput.className = 'editable-textbox goal-textbox';
             goalInput.value = todo.goal;
             goalInput.placeholder = '設定目標...';
             goalInput.addEventListener('change', () => {
@@ -591,15 +611,14 @@
                 saveToLocalStorage();
             });
 
-            // 進度追蹤 Textbox
+            // 進度追蹤 Textbox（高彈力）
             const progressBox = document.createElement('div');
-            progressBox.className = 'field-box';
+            progressBox.className = 'field-box progress-box';
             progressBox.innerHTML = `<span class="field-label">Progress Track</span>`;
             const progressInput = document.createElement('textarea');
-            progressInput.className = 'editable-textbox';
-            progressInput.rows = 1;
+            progressInput.className = 'editable-textbox progress-textbox';
             progressInput.value = todo.progress;
-            progressInput.placeholder = '隨時更新進度...';
+            progressInput.placeholder = '更新階段紀錄...';
             progressInput.addEventListener('change', () => {
                 todo.progress = progressInput.value.trim();
                 saveToLocalStorage();
