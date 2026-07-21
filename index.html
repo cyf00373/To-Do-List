@@ -11,24 +11,26 @@
     
     <style>
         :root {
+            /* 漸層背景色：從頂部微光深灰 到 底部的深沉極黑 */
             --bg-gradient: radial-gradient(circle at 50% 30%, #315371 0%, #111113 80%);
-            --card-bg: #202023;         /* 內斂卡片色 */
-            --input-bg: #121214;        /* 輸入框沉浸底色 */
-            --border-color: #2e2e33;    /* 細緻分隔線 */
+            --card-bg: #1e1e21;         /* 內斂卡片色 */
+            --input-bg: #141416;        /* 輸入框沉浸底色 */
+            --border-color: #2e2e34;    /* 細緻分隔線 */
             
-            --text-main: #ededf0;       /* 主文字：清晰舒服白 */
-            --text-sub: #8e8e93;        /* 次要文字：質感次灰 */
-            --text-muted: #5c5c61;      /* 完成/弱化文字 */
+            --text-main: #ededf0;       
+            --text-sub: #8e8e93;        
+            --text-muted: #5c5c61;      
             
-            --accent-p1: #ef4444;       /* 重要且緊急：警示紅 */
-            --accent-p2: #f97316;       /* 重要不緊急：戰略橘 */
-            --accent-p3: #eab308;       /* 不重要緊急：快處理黃 */
-            --accent-p4: #64748b;       /* 不重要不緊急：低調灰藍 */
+            --accent-p1: #ef4444;       
+            --accent-p2: #f97316;       
+            --accent-p3: #eab308;       
+            --accent-p4: #64748b;       
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
+            background: var(--bg-gradient); /* 套用漸層 */
+            background-attachment: fixed;  /* 滾動時背景固定，維持光影質感 */
             color: var(--text-main);
             margin: 0;
             padding: 30px 20px;
