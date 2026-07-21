@@ -11,7 +11,7 @@
     
     <style>
         :root {
-            --bg-color: #161618;        /* 深灰底色 */
+            --bg-gradient: radial-gradient(circle at 50% 30%, #315371 0%, #111113 80%);
             --card-bg: #202023;         /* 內斂卡片色 */
             --input-bg: #121214;        /* 輸入框沉浸底色 */
             --border-color: #2e2e33;    /* 細緻分隔線 */
@@ -153,6 +153,7 @@
         }
 
         .quadrant {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
